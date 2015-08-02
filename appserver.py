@@ -20,17 +20,21 @@ from tornado.web import MissingArgumentError
 from tornado_cors import CorsMixin
 
 # TODO: must be changed
+from holydate import VisualPaschalion
 from utils import CalendarDisplay
 
 
 define('port', default=9001, help='run on the given port', type=int)
 
 
-_calendar_fields = [
+_fields = [
     'daily_feast', 'tone', 'saints',
     'fast', 'bows', 'julian_date',
     'gregorian_date', 'day_of_week',
-    'daily_status',
+    'daily_status', 'year',
+    'resurrection_day', 'fast_free_weeks',
+    'fasts', 'movable_feasts', 'minor_fixed_feasts',
+    'major_fixed_feasts', 'soul_saturdays',
 ]
 
 
@@ -57,12 +61,35 @@ def _day_bundle(day, month, year, calendar, fields):
     return out
 
 
+def _paschalion_bundle(year, calendar, fields):
+    paschalion = VisualPaschalion(year, calendar=calendar)
+    _date = datetime(year, 1, 1)
+
+    bundle = dict(
+        year='get_year',
+        resurrection_day='get_resurrection_day',
+        fast_free_weeks='get_fast_free_weeks',
+        fasts='get_fasts',
+        movable_feasts='get_movable_feasts',
+        minor_fixed_feasts='get_minor_fixed_feasts',
+        major_fixed_feasts='get_major_fixed_feasts',
+        soul_saturdays='get_soul_saturdays',
+    )
+
+    out = dict(date=_date.strftime("%Y-%m-%d"))
+    for key, value in bundle.iteritems():
+        if key in fields:
+            out.update({key: getattr(paschalion, value).__call__()})
+    return out
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r'/(\d{4}/\d{2}/\d{2})/?', DaysHandler),
             (r'/(\d{4}/\d{2})/?', MonthHandler),
             (r'/(\d{4})/?', YearHandler),
+            (r'/paschalion/(\d{4})/?', PaschalionHandler),
         ]
         settings = dict(
             debug=True,
@@ -77,6 +104,7 @@ class CorsRequestMixin(CorsMixin):
 
 class CalendarBaseHandler(CorsRequestMixin, tornado.web.RequestHandler):
     def get(self, slug):
+        print slug
         try:
             self.date = dateutil.parser.parse(slug)
         except ValueError:
@@ -88,7 +116,7 @@ class CalendarBaseHandler(CorsRequestMixin, tornado.web.RequestHandler):
             raise tornado.web.HTTPError(404, 'calendar system not found')
 
         self.fields = self.get_argument(
-            'fields', default=u",".join(i for i in _calendar_fields))
+            'fields', default=u",".join(i for i in _fields))
         self.fields = self.fields.split(',')
 
         self.result = dict()
@@ -144,6 +172,19 @@ class YearHandler(CalendarBaseHandler):
 
         self.result['year'] = []
         self.result['year'].append(months_list)
+
+
+class PaschalionHandler(CalendarBaseHandler):
+    def get_data(self):
+
+        self.result['paschalion'] = []
+        self.result['paschalion'].append(
+            _paschalion_bundle(
+                self.date.year,
+                calendar=self.calendar_system,
+                fields=self.fields
+            )
+        )
 
 
 def main():
