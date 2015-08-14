@@ -6,7 +6,7 @@ Application REST server for api.calendar.drevle.com
 :copyright 2015 by Maxim Chernyatevich
 """
 
-from datetime import datetime
+from datetime import datetime, date
 import calendar
 import dateutil.parser
 
@@ -20,8 +20,8 @@ from tornado.web import MissingArgumentError
 from tornado_cors import CorsMixin
 
 # TODO: must be changed
-from holydate import VisualPaschalion
-from utils import CalendarDisplay
+from holydate import VisualPaschalion, search_feasts
+from utils import CalendarDisplay, formatter
 
 
 define('port', default=9001, help='run on the given port', type=int)
@@ -83,6 +83,25 @@ def _paschalion_bundle(year, calendar, fields):
     return out
 
 
+def _search_bundle(search_string):
+    result = search_feasts(search_string)
+
+    out = dict(count=result.get('count'))
+
+    out_list = []
+    for item in result.get('result'):
+        out_list.append(dict(
+            gregorianDate=date(
+                item[0][2], item[0][1], item[0][0]).strftime("%Y-%m-%d"),
+            julianDate=date(
+                item[1][2], item[1][1], item[1][0]).strftime("%Y-%m-%d"),
+            searchItem=item[2].format(**formatter)
+        ))
+
+    out['result'] = out_list
+    return out
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
@@ -90,6 +109,7 @@ class Application(tornado.web.Application):
             (r'/(\d{4}/\d{2})/?', MonthHandler),
             (r'/(\d{4})/?', YearHandler),
             (r'/paschalion/(\d{4})/?', PaschalionHandler),
+            (r'/search/?', SearchHandler),
         ]
         settings = dict(
             debug=True,
@@ -104,7 +124,6 @@ class CorsRequestMixin(CorsMixin):
 
 class CalendarBaseHandler(CorsRequestMixin, tornado.web.RequestHandler):
     def get(self, slug):
-        print slug
         try:
             self.date = dateutil.parser.parse(slug)
         except ValueError:
@@ -185,6 +204,17 @@ class PaschalionHandler(CalendarBaseHandler):
                 fields=self.fields
             )
         )
+
+
+class SearchHandler(CorsRequestMixin, tornado.web.RequestHandler):
+    def get(self):
+        query = self.get_argument('query', '')
+
+        result = dict(searchResult=[])
+        result['searchResult'].append(
+            _search_bundle(query)
+        )
+        self.write(result)
 
 
 def main():

@@ -2,7 +2,7 @@
 
 from holydate import AncientCalendar, menology
 
-_formatter = dict(
+formatter = dict(
     red=u'<span class="red">',
     bold=u'<span class="bold">',
     end=u'</span>',
@@ -11,6 +11,8 @@ _formatter = dict(
     gl=u'<span class="glorium">Ӵ</span>',
     sx=u'<span class="six">Ӵ</span>',
     redgui=u'',
+    highlight_start=u'<span class="highlight">',
+    highlight_end=u'</span>'
 )
 
 
@@ -20,10 +22,10 @@ class CalendarDisplay(AncientCalendar):
     """
 
     def get_daily_feast_as_html(self):
-        return self.get_daily_feast().format(**_formatter)
+        return self.get_daily_feast().format(**formatter)
 
     def get_saints_as_html(self):
-        return self.get_saints().format(**_formatter)
+        return self.get_saints().format(**formatter)
 
     def get_daily_status(self):
         """
