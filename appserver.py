@@ -6,9 +6,9 @@ Application REST server for api.calendar.drevle.com
 :copyright 2015 by Maxim Chernyatevich
 """
 
-from datetime import datetime, date
 import calendar
 import dateutil.parser
+from datetime import datetime, date
 
 import tornado.httpserver
 import tornado.ioloop
@@ -28,13 +28,13 @@ define('port', default=9001, help='run on the given port', type=int)
 
 
 _fields = [
-    'daily_feast', 'tone', 'saints',
-    'fast', 'bows', 'julian_date',
-    'gregorian_date', 'day_of_week',
-    'daily_status', 'year',
-    'resurrection_day', 'fast_free_weeks',
-    'fasts', 'movable_feasts', 'minor_fixed_feasts',
-    'major_fixed_feasts', 'soul_saturdays',
+    'dailyFeast', 'tone', 'saints',
+    'fast', 'bows', 'julianDate',
+    'gregorianDate', 'dayOfweek',
+    'dailyStatus', 'year',
+    'resurrectionDay', 'fastFreeWeeks',
+    'fasts', 'movableFeasts', 'minorFixedFeasts',
+    'majorFixedFeasts', 'soulSaturdays',
 ]
 
 
@@ -43,15 +43,15 @@ def _day_bundle(day, month, year, calendar, fields):
     _date = datetime(year, month, day)
 
     bundle = dict(
-        daily_feast='get_daily_feast_as_html',
+        dailyFeast='get_daily_feast_as_html',
         tone='get_tone',
         saints='get_saints_as_html',
         fast='get_fast',
         bows='get_bows',
-        julian_date='get_julian_date',
-        gregorian_date='get_gregorian_date',
-        day_of_week='get_day_of_week',
-        daily_status='get_daily_status'
+        julianDate='get_julian_date',
+        gregorianDate='get_gregorian_date',
+        dayOfWeek='get_day_of_week',
+        dailyStatus='get_daily_status'
     )
 
     out = dict(date=_date.strftime("%Y-%m-%d"))
@@ -67,13 +67,13 @@ def _paschalion_bundle(year, calendar, fields):
 
     bundle = dict(
         year='get_year',
-        resurrection_day='get_resurrection_day',
-        fast_free_weeks='get_fast_free_weeks',
+        resurrectionDay='get_resurrection_day',
+        fastFreeWeeks='get_fast_free_weeks',
         fasts='get_fasts',
-        movable_feasts='get_movable_feasts',
-        minor_fixed_feasts='get_minor_fixed_feasts',
-        major_fixed_feasts='get_major_fixed_feasts',
-        soul_saturdays='get_soul_saturdays',
+        movableFeasts='get_movable_feasts',
+        minorFixedFeasts='get_minor_fixed_feasts',
+        majorFixedFeasts='get_major_fixed_feasts',
+        soulSaturdays='get_soul_saturdays',
     )
 
     out = dict(date=_date.strftime("%Y-%m-%d"))
@@ -90,13 +90,17 @@ def _search_bundle(search_string):
 
     out_list = []
     for item in result.get('result'):
-        out_list.append(dict(
-            gregorianDate=date(
-                item[0][2], item[0][1], item[0][0]).strftime("%Y-%m-%d"),
-            julianDate=date(
-                item[1][2], item[1][1], item[1][0]).strftime("%Y-%m-%d"),
-            searchItem=item[2].format(**formatter)
-        ))
+        # FIXME:
+        try:
+            out_list.append(dict(
+                gregorianDate=date(
+                    item[1][2], item[1][1], item[1][0]).strftime("%Y-%m-%d"),
+                julianDate=date(
+                    item[0][2], item[0][1], item[0][0]).strftime("%Y-%m-%d"),
+                searchItem=item[2].format(**formatter)
+            ))
+        except ValueError:
+            pass
 
     out['result'] = out_list
     return out
@@ -105,7 +109,7 @@ def _search_bundle(search_string):
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r'/(\d{4}/\d{2}/\d{2})/?', DaysHandler),
+            (r'/(\d{4}/\d{2}/\d{2})/?', DayHandler),
             (r'/(\d{4}/\d{2})/?', MonthHandler),
             (r'/(\d{4})/?', YearHandler),
             (r'/paschalion/(\d{4})/?', PaschalionHandler),
@@ -146,15 +150,12 @@ class CalendarBaseHandler(CorsRequestMixin, tornado.web.RequestHandler):
         return self.date, self.calendar_system, self.fields, self.result
 
 
-class DaysHandler(CalendarBaseHandler):
+class DayHandler(CalendarBaseHandler):
     def get_data(self):
-        self.result['day'] = []
-        self.result['day'].append(
-            _day_bundle(
-                self.date.day, self.date.month, self.date.year,
-                calendar=self.calendar_system,
-                fields=self.fields
-            )
+        self.result['day'] = _day_bundle(
+            self.date.day, self.date.month, self.date.year,
+            calendar=self.calendar_system,
+            fields=self.fields
         )
 
 
@@ -172,8 +173,7 @@ class MonthHandler(CalendarBaseHandler):
                 fields=self.fields
             ))
 
-        self.result['month'] = []
-        self.result['month'].append(days_list)
+        self.result['month'] = days_list
 
 
 class YearHandler(CalendarBaseHandler):
@@ -189,32 +189,23 @@ class YearHandler(CalendarBaseHandler):
                     fields=self.fields
                 ))
 
-        self.result['year'] = []
-        self.result['year'].append(months_list)
+        self.result['year'] = months_list
 
 
 class PaschalionHandler(CalendarBaseHandler):
     def get_data(self):
 
-        self.result['paschalion'] = []
-        self.result['paschalion'].append(
-            _paschalion_bundle(
-                self.date.year,
-                calendar=self.calendar_system,
-                fields=self.fields
-            )
+        self.result['paschalion'] = _paschalion_bundle(
+            self.date.year,
+            calendar=self.calendar_system,
+            fields=self.fields
         )
 
 
 class SearchHandler(CorsRequestMixin, tornado.web.RequestHandler):
     def get(self):
         query = self.get_argument('query', '')
-
-        result = dict(searchResult=[])
-        result['searchResult'].append(
-            _search_bundle(query)
-        )
-        self.write(result)
+        self.write(_search_bundle(query))
 
 
 def main():
