@@ -1,5 +1,5 @@
 tornado
 tornado-cors
 redis
-holydate
+git+https://github.com/vechnoe/holydate.git
 python-dateutil
