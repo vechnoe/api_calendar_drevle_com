@@ -1,4 +1,5 @@
 tornado
 tornado-cors
+redis
 holydate
 python-dateutil
