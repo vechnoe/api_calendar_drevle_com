@@ -1,4 +1,4 @@
-api.calendar.drevle.com
+api_calendar_drevle_com
 =======================
 
 Description
