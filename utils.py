@@ -1,6 +1,5 @@
 # coding: utf-8
 
-import redis
 import hashlib
 import calendar
 from datetime import datetime, date
@@ -29,8 +28,7 @@ def hashkey(string):
     return hasher.hexdigest()
 
 
-def redis_cache(key, handler, **kwargs):
-    redis_storage = redis.StrictRedis(host='localhost', port=6379, db=0)
+def redis_cache(redis_storage, key, handler, **kwargs):
     key = hashkey(key)
 
     if redis_storage.exists(key):
@@ -45,14 +43,14 @@ def redis_cache(key, handler, **kwargs):
 def day_handler(**kwargs):
     date = kwargs['date']
 
-    cal = CalendarDisplay(
+    cal = AncientCalendar(
         date.day, date.month, date.year, calendar=kwargs['calendar_system'])
     _date = datetime(date.year, date.month, date.day)
 
     bundle = dict(
-        dailyFeast='get_daily_feast_as_html',
+        dailyFeast='get_daily_feast',
         tone='get_tone',
-        saints='get_saints_as_html',
+        saints='get_saints',
         fast='get_fast',
         bows='get_bows',
         julianDate='get_julian_date',
@@ -63,7 +61,8 @@ def day_handler(**kwargs):
     out = dict(date=_date.strftime("%Y-%m-%d"))
     for key, value in bundle.iteritems():
         if key in kwargs['fields']:
-            out.update({key: getattr(cal, value).__call__()})
+            out.update({key: getattr(
+                cal, value).__call__().format(**FORMATTER)})
     return out
 
 
@@ -90,34 +89,11 @@ def paschalion_handler(**kwargs):
     return out
 
 
-def search_handler(**kwargs):
-    result = search_feasts(kwargs['query'])
-    out = dict(count=result.get('count'))
-
-    out_list = []
-    for item in result.get('result'):
-        # FIXME:
-        try:
-            out_list.append(dict(
-                gregorianDate=date(
-                    item[1][2], item[1][1], item[1][0]).strftime("%Y-%m-%d"),
-                julianDate=date(
-                    item[0][2], item[0][1], item[0][0]).strftime("%Y-%m-%d"),
-                searchItem=item[2].format(**FORMATTER)
-            ))
-        except ValueError:
-            pass
-
-    out['result'] = out_list
-    return out
-
-
 def month_handler(**kwargs):
     _date = kwargs['date']
     out = []
-    days_in_month = calendar.monthrange(_date.year, _date.month)[1] + 1
 
-    for day in range(1, days_in_month):
+    for day in range(1, calendar.monthrange(_date.year, _date.month)[1] + 1):
         out.append(
             day_handler(
                 date=date(_date.year, _date.month, day),
@@ -142,10 +118,23 @@ def year_handler(**kwargs):
     return out
 
 
-class CalendarDisplay(AncientCalendar):
+def search_handler(**kwargs):
+    result = search_feasts(kwargs['query'])
+    out = dict(count=result.get('count'))
 
-    def get_daily_feast_as_html(self):
-        return self.get_daily_feast().format(**FORMATTER)
+    out_list = []
+    for item in result.get('result'):
+        # FIXME:
+        try:
+            out_list.append(dict(
+                gregorianDate=date(
+                    item[1][2], item[1][1], item[1][0]).strftime("%Y-%m-%d"),
+                julianDate=date(
+                    item[0][2], item[0][1], item[0][0]).strftime("%Y-%m-%d"),
+                searchItem=item[2].format(**FORMATTER)
+            ))
+        except ValueError:
+            pass
 
-    def get_saints_as_html(self):
-        return self.get_saints().format(**FORMATTER)
+    out['result'] = out_list
+    return out

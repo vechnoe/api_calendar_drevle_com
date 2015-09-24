@@ -3,3 +3,7 @@ tornado-cors
 redis
 git+https://github.com/vechnoe/holydate.git
 python-dateutil
+
+nose
+mock
+fakeredis
