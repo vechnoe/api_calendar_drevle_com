@@ -5,6 +5,7 @@ Application REST server for api.calendar.drevle.com
 :copyright 2015 by Maxim Chernyatevich
 """
 import redis
+from datetime import datetime
 import dateutil.parser
 
 import tornado.httpserver
@@ -23,6 +24,9 @@ from utils import day_handler, paschalion_handler, \
 define('port', default=9001, help='run on the given port', type=int)
 
 REDIS_STORAGE = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+DATE_BEGIN = datetime(1900, 1, 1)
+DATE_END = datetime(2099, 12, 31)
 
 FIELDS = [
     'dailyFeast', 'tone', 'saints',
@@ -60,6 +64,9 @@ class CalendarBaseHandler(CorsRequestMixin, tornado.web.RequestHandler):
         try:
             self.date = dateutil.parser.parse(slug)
         except ValueError:
+            raise tornado.web.HTTPError(404, 'date invalid')
+
+        if not DATE_END > self.date > DATE_BEGIN:
             raise tornado.web.HTTPError(404, 'date invalid')
 
         self.calendar_system = self.get_argument(

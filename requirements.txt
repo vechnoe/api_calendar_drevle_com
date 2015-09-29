@@ -6,4 +6,5 @@ python-dateutil
 
 nose
 mock
+requests
 fakeredis
