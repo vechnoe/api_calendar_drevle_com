@@ -1,13 +1,36 @@
-export PYTHONPATH:=.:$(PYTHONPATH)
+PROJECT_DIR=$(shell pwd)
+VENV_DIR?=$(PROJECT_DIR)/.env
+PIP?=$(VENV_DIR)/bin/pip
+PYTHON?=$(VENV_DIR)/bin/python
+NOSE?=$(VENV_DIR)/bin/nosetests
 
-install:
-	pip install -r requirements.txt
+.PHONY: all clean test
 
-run:
-	python appserver.py --port=9001
+all: virtualenv pip
 
-clean:
+virtualenv:
+	virtualenv $(VENV_DIR)
+
+pip: requirements
+
+requirements:
+	$(PIP) install -r $(PROJECT_DIR)/requirements.txt
+
+test:
+	$(NOSE) $(PROJECT_DIR) --verbose
+
+run_dev:
+	$(PYTHON) appserver.py --port=9001
+
+clean_temp:
+	find . -name '*.pyc' -delete
+	rm -rf .coverage dist docs/_build htmlcov MANIFEST
+
+clean_redis:
 	redis-cli flushall
 
-cleanall:
-	rm -r *.pyc
+clean_venv:
+	rm -rf $(VENV_DIR)
+
+clean: clean_temp clean_redis clean_venv
+
