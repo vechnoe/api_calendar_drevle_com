@@ -4,6 +4,7 @@
 Application REST server for api.calendar.drevle.com
 :copyright 2015 by Maxim Chernyatevich
 """
+
 import redis
 from datetime import datetime
 import dateutil.parser
@@ -22,6 +23,7 @@ from utils import day_handler, paschalion_handler, \
 
 
 define('port', default=9001, help='run on the given port', type=int)
+define('debug', default=True, help='debug mode', type=bool)
 
 REDIS_STORAGE = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -49,7 +51,7 @@ class Application(tornado.web.Application):
             (r'/search/?', SearchHandler),
         ]
         settings = dict(
-            debug=True,
+            debug=options.debug,
         )
         tornado.web.Application.__init__(self, handlers, **settings)
 

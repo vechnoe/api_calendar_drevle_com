@@ -1,6 +1,7 @@
 *.pyc
 *~
 env/
+.env/
 logs/*
 .idea/
 build/

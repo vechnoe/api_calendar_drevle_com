@@ -4,7 +4,7 @@ PIP?=$(VENV_DIR)/bin/pip
 PYTHON?=$(VENV_DIR)/bin/python
 NOSE?=$(VENV_DIR)/bin/nosetests
 
-.PHONY: all clean test
+.PHONY: all clean test run pip virtualenv
 
 all: virtualenv pip
 
@@ -19,8 +19,8 @@ requirements:
 test:
 	$(NOSE) $(PROJECT_DIR) --verbose
 
-run_dev:
-	$(PYTHON) appserver.py --port=9001
+run:
+	$(PYTHON) appserver.py --port=9001 --debug=false
 
 clean_temp:
 	find . -name '*.pyc' -delete
