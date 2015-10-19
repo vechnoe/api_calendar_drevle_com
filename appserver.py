@@ -137,7 +137,7 @@ class SearchHandler(CorsRequestMixin, tornado.web.RequestHandler):
 
 class SimpleHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write('<h1>Hola!</h1>')
+        self.write('<h1>Hello world</h1>')
 
 
 def main():

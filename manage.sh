@@ -10,7 +10,7 @@ start() {
 }
 
 stop() {
-    pid=`ps -ef | grep 'python appserver.py' | awk '{ print $2 }'`
+    pid=`ps -ef | grep '[a]ppserver.py' | awk '{ print $2 }'`
     echo $pid
     kill $pid
     sleep 2
