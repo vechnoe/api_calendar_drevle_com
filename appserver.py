@@ -22,7 +22,7 @@ from utils import day_handler, paschalion_handler, \
 
 
 define('port', default=9001, help='run on the given port', type=int)
-define('debug', default=True, help='debug mode', type=bool)
+define('debug', default=False, help='debug mode', type=bool)
 
 REDIS_STORAGE = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -139,7 +139,6 @@ def main():
     http_server = tornado.httpserver.HTTPServer(Application())
     http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
-
 
 if __name__ == '__main__':
     main()

@@ -19,8 +19,14 @@ requirements:
 test:
 	$(NOSE) $(PROJECT_DIR) --verbose
 
-run:
-	$(PYTHON) appserver.py --port=9001 --debug=false
+start:
+	./manage.sh start
+
+stop:
+	./manage.sh stop
+
+restart:
+	./manage.sh restart
 
 clean_temp:
 	find . -name '*.pyc' -delete
