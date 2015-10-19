@@ -158,6 +158,15 @@ class HandlersTestCase(BaseHTTPTestCase):
         data = json.loads(response.body)
         self.assertDictEqual(data, {u'count': 0, u'result': []})
 
+    def test_static(self):
+        """
+        Check static path, favicon.ico
+        """
+        response = self.client.get(u'/static/')
+        self.assertEqual(response.code, 403)
+        response = self.client.get(u'/static/favicon.ico')
+        self.assertEqual(response.code, 200)
+
 
 
 

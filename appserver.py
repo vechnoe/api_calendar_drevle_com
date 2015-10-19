@@ -4,7 +4,7 @@
 Application REST server for api.calendar.drevle.com
 :copyright 2015 by Maxim Chernyatevich
 """
-
+import os
 import redis
 from datetime import datetime
 import dateutil.parser
@@ -14,7 +14,6 @@ import tornado.ioloop
 import tornado.web
 import tornado.options
 from tornado.options import define, options
-from tornado.web import MissingArgumentError
 
 from tornado_cors import CorsMixin
 
@@ -51,6 +50,7 @@ class Application(tornado.web.Application):
             (r'/search/?', SearchHandler),
         ]
         settings = dict(
+            static_path=os.path.join(os.path.dirname(__file__), 'static'),
             debug=options.debug,
         )
         tornado.web.Application.__init__(self, handlers, **settings)
