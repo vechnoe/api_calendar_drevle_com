@@ -71,7 +71,7 @@ class CalendarBaseHandler(CorsRequestMixin, tornado.web.RequestHandler):
 
         self.calendar_system = self.get_argument(
             'calendar', default='gregorian')
-        if not self.calendar_system in ['julia', 'gregorian']:
+        if not self.calendar_system in ['julian', 'gregorian']:
             raise tornado.web.HTTPError(404, 'calendar system not found')
 
         self.fields = self.get_argument(
