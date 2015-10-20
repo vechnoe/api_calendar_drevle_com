@@ -48,7 +48,6 @@ class Application(tornado.web.Application):
             (r'/(\d{4})/?', YearHandler),
             (r'/paschalion/(\d{4})/?', PaschalionHandler),
             (r'/search/?', SearchHandler),
-            (r'/sm/', SimpleHandler),
         ]
         settings = dict(
             static_path=os.path.join(os.path.dirname(__file__), 'static'),
@@ -133,11 +132,6 @@ class SearchHandler(CorsRequestMixin, tornado.web.RequestHandler):
             query=self.get_argument('query', '')
         )
         self.write(result)
-
-
-class SimpleHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write('<h1>Hello any</h1>')
 
 
 def main():
