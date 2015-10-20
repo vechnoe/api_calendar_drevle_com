@@ -50,7 +50,6 @@ class Application(tornado.web.Application):
             (r'/search/?', SearchHandler),
         ]
         settings = dict(
-            static_path=os.path.join(os.path.dirname(__file__), 'static'),
             debug=options.debug,
         )
         tornado.web.Application.__init__(self, handlers, **settings)
