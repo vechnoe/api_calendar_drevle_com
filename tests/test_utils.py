@@ -34,7 +34,8 @@ class UtilsTestCase(unittest.TestCase):
         self.redis_storage = fakeredis.FakeStrictRedis()
         self.handler = fake_handler
         self.date = datetime.date(2015, 1, 1)
-        self.fields = ['date', 'tone', 'bows', 'fast', 'dailyFeast']
+        self.fields = [
+            'date', 'tone', 'bows', 'fast', 'dayOfWeek', 'dailyFeast']
         self.paschalion_fields = [
             'date', 'resurrectionDay', 'fastFreeWeeks', 'fasts'
         ]

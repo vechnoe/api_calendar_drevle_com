@@ -32,7 +32,7 @@ DATE_END = datetime(2099, 12, 31)
 FIELDS = [
     'dailyFeast', 'tone', 'saints',
     'fast', 'bows', 'julianDate',
-    'gregorianDate', 'dayOfweek',
+    'gregorianDate', 'dayOfWeek',
     'dailyStatus', 'year',
     'resurrectionDay', 'fastFreeWeeks',
     'fasts', 'movableFeasts', 'minorFixedFeasts',

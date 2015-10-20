@@ -55,7 +55,7 @@ def day_handler(**kwargs):
         bows='get_bows',
         julianDate='get_julian_date',
         gregorianDate='get_gregorian_date',
-        dayOfWeek='get_day_of_week'
+        dayOfWeek='get_day_of_week',
     )
 
     out = dict(date=_date.strftime("%Y-%m-%d"))
