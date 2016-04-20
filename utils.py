@@ -53,7 +53,7 @@ def day_handler(**kwargs):
         saints='get_saints',
         fast='get_fast',
         bows='get_bows',
-        julianDate='get_julian_date',
+        julianDate='get_julian_date_am',
         gregorianDate='get_gregorian_date',
         dayOfWeek='get_day_of_week',
     )

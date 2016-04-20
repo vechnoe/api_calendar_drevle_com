@@ -6,7 +6,7 @@ NOSE?=$(VENV_DIR)/bin/nosetests
 
 .PHONY: all clean test run pip virtualenv
 
-all: virtualenv pip
+all: clean virtualenv pip
 
 virtualenv:
 	virtualenv $(VENV_DIR)
