@@ -18,7 +18,11 @@ FORMATTER = dict(
     sx=u'<span class="six">Ӵ</span>',
     redgui=u'',
     highlight_start=u'<span class="highlight">',
-    highlight_end=u'</span>'
+    highlight_end=u'</span>',
+    head=u'<h4>',
+    endhead=u'</h4>',
+    p=u'<p>',
+    endp=u'</p>',
 )
 
 
@@ -85,7 +89,12 @@ def paschalion_handler(**kwargs):
     out = dict(date=_date.strftime("%Y-%m-%d"))
     for key, value in bundle.iteritems():
         if key in kwargs['fields']:
-            out.update({key: getattr(paschalion, value).__call__()})
+            data = getattr(paschalion, value).__call__()
+            result = dict(
+                headline=data['headline'],
+                result=[s.format(**FORMATTER) for s in data['result']]
+            )
+            out.update({key: result})
     return out
 
 
